@@ -3,6 +3,7 @@
 
 #include "bucket.h"
 #include "word_entry.h"
+#include "analisys_result.h"
 
 typedef struct {
     bucket **buckets;
@@ -12,6 +13,7 @@ typedef struct {
 int initialize_word_count_array(word_count_array *array);
 void free_word_count_array(word_count_array *array);
 int append_array(word_count_array *array, word_entry *entry);
+int count_most_used_word(word_count_array *array, analysis_result *result);
 
 
 
