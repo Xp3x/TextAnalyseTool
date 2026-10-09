@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "analisys_result.h"
+#include "analysis_result.h"
 
 typedef struct text_file {
     char *filename;         // Dateiname

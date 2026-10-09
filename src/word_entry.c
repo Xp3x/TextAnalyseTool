@@ -1,6 +1,5 @@
 #include "text_file.h"
 #include "word_entry.h"
-#include "word_count.h"
 
 #include <stdlib.h>
 #include <stdio.h>

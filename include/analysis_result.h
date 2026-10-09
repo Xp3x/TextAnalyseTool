@@ -1,7 +1,8 @@
 #include <stddef.h>
-#ifndef ANALISYS_RESULT_H
-#define ANALISYS_RESULT_H
-#include "word_count.h"
+#ifndef ANALYSIS_RESULT_H
+#define ANALYSIS_RESULT_H
+
+#include "word_entry.h"
 #include "word_pair_count.h"
 
 typedef struct {
@@ -9,8 +10,8 @@ typedef struct {
     size_t char_count;
     size_t char_count_no_space;
 
-    word_count *word_counts;
-    size_t word_count_total;
+    word_entry *most_used_word;
+    size_t most_used_word_count;
 
     word_pair_count *word_pair_counts;
     size_t word_pair_count_total;
@@ -21,4 +22,4 @@ int analysis_result_init(analysis_result *result);
 void free_analysis_result(analysis_result *result);
 analysis_result *create_analysis_result(void);
 
-#endif // ANALISYS_RESULT_H
+#endif // ANALYSIS_RESULT_H

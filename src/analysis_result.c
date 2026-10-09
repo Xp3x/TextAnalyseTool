@@ -1,4 +1,4 @@
-#include "analisys_result.h"
+#include "analysis_result.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,8 +15,8 @@ int analysis_result_init(analysis_result *result) {
     result->char_count = 0;
     result->char_count_no_space = 0;
 
-    result->word_counts = NULL;
-    result->word_count_total = 0;
+    result->most_used_word = NULL;
+    result->most_used_word_count = 0;
 
     result->word_pair_counts = NULL;
     result->word_pair_count_total = 0;
