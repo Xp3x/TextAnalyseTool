@@ -1,5 +1,6 @@
 #include "text_file.h"
 #include "word_entry.h"
+#include "word_cutting.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,46 +23,56 @@ word_entry *create_word_entry(void) {
 
 /**
  * @brief Sammelt ab der aktuellen Pufferposition Buchstaben zu einem Worteintrag.
- * Nichtbuchstaben werden uebersprungen. Ein Eintrag wird zurueckgegeben, wenn
- * auf einen Buchstaben Whitespace oder das Pufferende folgt; buffer_pos wird
- * dabei weitergesetzt. Es werden keine weiteren Dateibloecke eingelesen.
+ * Satzzeichen werden uebersprungen; Whitespace schliesst ein Wort ab.
+ * Am Pufferende bleibt ein Wortteil in wc erhalten, bis Whitespace oder
+ * eof_reached das Wort abschliesst. Es werden keine Dateibloecke eingelesen.
+ * Woerter mit mehr als 99 Buchstaben werden auf 99 Buchstaben gekuerzt;
+ * die restlichen Zeichen werden bis zum Wortende weiterhin konsumiert.
  * @param tf Textdatei mit gueltigem Puffer und aktueller Leseposition.
- * @pre Der gesammelte Text umfasst hoechstens 99 Buchstaben.
+ * @param wc Einmal pro Textdatei initialisierter Zustand fuer alle Aufrufe.
  * @return Neuer Eintrag mit Zaehler 1 oder NULL bei ungueltigem Puffer,
- *         Speichermangel oder wenn kein Eintrag abgeschlossen wurde.
- *         Der Aufrufer ist fuer die Freigabe des neuen Eintrags verantwortlich.
+ *         Speichermangel oder wenn kein Wort abgeschlossen wurde. Bei
+ *         verbrauchtem Puffer ohne EOF muss der Aufrufer den naechsten Block
+ *         einlesen und erneut aufrufen, auch wenn dieser Block leer ist.
+ *         cutting_flag zeigt einen wartenden Wortteil an. Zurueckgegebene
+ *         Eintraege gehoeren dem Aufrufer und sind nicht mehr in wc gespeichert.
  */
-word_entry *build_word(text_file *tf){
-    if(!tf || !tf->buffer) return NULL;
-    char temp_word[100];
-    temp_word[0] = '\0';
+word_entry *build_word(text_file *tf, word_cutting *wc){
+    if(!tf || !tf->buffer || !wc) return NULL;
 
     while(tf->buffer_pos < tf->buffer_used){
-        for(size_t i=tf->buffer_pos; i<tf->buffer_used; i++){
-            if(isspace((unsigned char)tf->buffer[i]) == 0 && isalpha((unsigned char)tf->buffer[i]) != 0){
-                size_t len = strlen(temp_word);
-                temp_word[len] = tf->buffer[i];
-                temp_word[len+1] = '\0';
-
-                if(i + 1 == tf->buffer_used || isspace((unsigned char)tf->buffer[i + 1]) != 0){
-                    word_entry *entry = create_word_entry();
-                    if(!entry) return NULL;
-                    strncpy(entry->word, temp_word, sizeof(entry->word) - 1);
-                    entry->word[sizeof(entry->word) - 1] = '\0';
-                    entry->count = 1;
-
-                    temp_word[0] = '\0';
-
-                    tf->buffer_pos = i + 1;
-
-                    return entry;
-                }
+        unsigned char current = (unsigned char)tf->buffer[tf->buffer_pos];
+        if(isalpha(current)){
+            if(!wc->firsthalf){
+                wc->firsthalf = create_word_entry();
+                if(!wc->firsthalf) return NULL;
+                wc->cutting_flag = 1;
+            }
+            size_t len = strlen(wc->firsthalf->word);
+            if(len < sizeof(wc->firsthalf->word) - 1){
+                wc->firsthalf->word[len] = (char)current;
+                wc->firsthalf->word[len + 1] = '\0';
             }
         }
-        tf->buffer_pos = tf->buffer_used;
+        tf->buffer_pos++;
+
+        if(isspace(current) && wc->firsthalf){
+            word_entry *entry = wc->firsthalf;
+            wc->firsthalf = NULL;
+            wc->cutting_flag = 0;
+            entry->count = 1;
+            return entry;
+        }
+    }
+
+    if(tf->eof_reached && wc->firsthalf){
+        word_entry *entry = wc->firsthalf;
+        wc->firsthalf = NULL;
+        wc->cutting_flag = 0;
+        entry->count = 1;
+        return entry;
     }
     return NULL;
-    
 }
 
 /**
