@@ -21,5 +21,8 @@ typedef struct {
 int analysis_result_init(analysis_result *result);
 void free_analysis_result(analysis_result *result);
 analysis_result *create_analysis_result(void);
+int analysis_result_save(const analysis_result *result, const char *filename);
+/* Ziel muss initialisiert und leer sein; geladene Zeigerdaten gehoeren dem Aufrufer. */
+int analysis_result_load(analysis_result *result, const char *filename);
 
 #endif // ANALYSIS_RESULT_H

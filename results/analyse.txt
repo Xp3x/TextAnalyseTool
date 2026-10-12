@@ -1,0 +1,5 @@
+Woerter: 770
+Zeichen (Bytes): 5267
+Zeichen ohne Whitespace (Bytes): 4467
+Haeufigstes Wort: die (33)
+Wortpaare: 0

@@ -81,6 +81,11 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    if (analysis_result_save(&result, "analyse.txt") != 0) {
+        fprintf(stderr, "Analyseergebnis konnte nicht gespeichert werden.\n");
+        goto free_table;
+    }
+    printf("\nAnalyseergebnis gespeichert: results/analyse.txt\n");
     status = EXIT_SUCCESS;
 
 free_table:
